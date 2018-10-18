@@ -1,10 +1,19 @@
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 const cfg = require('./config.json');
+const YouTube = require('simple-youtube-api');
+const ytapi = new YouTube(`${cfg.api_key}`);
+const ytdl = require('ytdl-core');
 
 bot.on('ready', () => {
 	console.log(`Logged in as : ${bot.user.tag} | ID : ${bot.user.id}`);
-	bot.user.setPresence({ game: { name: `Saber Developing me !`, type: 'WATCHING' }, status: 'online' });
+	bot.user.setPresence({
+		game: {
+			name: `Saber Developing me !`,
+			type: 'WATCHING'
+		},
+		status: 'online'
+	});
 });
 
 bot.on('message', msg => {
@@ -21,7 +30,7 @@ bot.on('message', msg => {
 	}
 
 	if (command === "kick") {
-		if (!msg.member.permissions.has("ADMINISTRATOR")) return ;
+		if (!msg.member.permissions.has("ADMINISTRATOR")) return;
 		const member = msg.mentions.members.first();
 		var reason = "";
 		for (var i = 1; i < args.length; i++) {
@@ -36,40 +45,54 @@ bot.on('message', msg => {
 	if (command === 'play') {
 		if (msg.member.voiceChannel) {
 			msg.member.voiceChannel.join()
-        .then(connection => { 
-          if (args.length >= 1) {
-          	const ytdl = require('ytdl-core');
-          connection.playStream(ytdl(
-          	`${args[0]}`,
-          	{ filter: 'audioonly' }));
-          // connection.playFile('./music.mp3');
-      }else {
-      	msg.reply('Invalid usage , use `~play <url>`');
-      }
-      })
-        .catch(console.log);
-    } else {
-    	msg.reply('You need to join a voice channel first!');
-    }
+				.then(connection => {
+					if (args.length >= 1) {
+						var queue = "";
+						for (var i = 0; i < args.length; i++) {
+							queue += " " + args[i];
+						}
+						ytapi.searchVideos(queue).then(r => {
+							msg.channel.send(`Currently Playing : ${r[0].title}`);
+							connection.playStream(ytdl(
+								r[0].url, {
+									filter: 'audioonly'
+								}));
 
-}
+						}).catch(console.error);
+
+						// connection.playFile('./music.mp3');
+					} else {
+						msg.reply('Invalid usage , use `~play <url>`');
+					}
+				})
+				.catch(console.log);
+		} else {
+			msg.reply('You need to join a voice channel first!');
+		}
+
+	}
 
 
- if (command === 'stop') {
- 	if (msg.member.voiceChannel) {
-    	msg.member.voiceChannel.leave();
-    } else {
-    	msg.reply('You need to join a voice channel first!');
-    }
- }
+	if (command === 'stop') {
+		if (msg.member.voiceChannel) {
+			msg.member.voiceChannel.leave();
+		} else {
+			msg.reply('You need to join a voice channel first!');
+		}
+	}
 
- if (command == "annie") {
- 	var words = "";
+	if (command == "annie") {
+		var words = "";
 		for (var i = 0; i < args.length; i++) {
 			words += " " + args[i];
 		}
-	msg.reply(`${words}`);
-}
+		msg.reply(words);
+	}
+
+	if (command === "yt") {
+
+	}
+
 });
 
 
@@ -77,13 +100,13 @@ bot.on('message', msg => {
 // Greeting the new joined member
 bot.on('guildMemberAdd', member => {
 	setTimeout(function () {
-         // Send the message to a designated channel on a server:
-         const channel = member.guild.channels.find(ch => ch.name === 'general');
-		  // Do nothing if the channel wasn't found on this server
-		  if (!channel) return;
-		  // Send the message, mentioning the member
-		  channel.send(`Have you seen my bear Tibbers ${member} ? :smiling_imp: `);
-		}, 5000);
+		// Send the message to a designated channel on a server:
+		const channel = member.guild.channels.find(ch => ch.name === 'general');
+		// Do nothing if the channel wasn't found on this server
+		if (!channel) return;
+		// Send the message, mentioning the member
+		channel.send(`Have you seen my bear Tibbers ${member} ? :smiling_imp: `);
+	}, 5000);
 });
 
 
