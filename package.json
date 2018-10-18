@@ -6,7 +6,7 @@
   "author": "Saber Hosney",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "github:discordjs/discord.js",
+    "discord.js": "^11.4.2",
     "opusscript": "0.0.6",
     "ytdl-core": "^0.26.2"
   }

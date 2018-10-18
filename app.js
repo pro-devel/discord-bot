@@ -16,6 +16,7 @@ bot.on('message', msg => {
 		const then = Date.now();
 		msg.channel.send("Pong !").then(m => {
 			m.edit(`Pong!, ${bot.ping}ms`);
+			msg.delete();
 		});
 	}
 
@@ -31,7 +32,47 @@ bot.on('message', msg => {
 		// .then(member.kick(reason));
 	}
 
+
+	if (command === 'play') {
+		if (msg.member.voiceChannel) {
+			msg.member.voiceChannel.join()
+        .then(connection => { 
+          if (args.length >= 1) {
+          	const ytdl = require('ytdl-core');
+          connection.playStream(ytdl(
+          	`${args[0]}`,
+          	{ filter: 'audioonly' }));
+          // connection.playFile('./music.mp3');
+      }else {
+      	msg.reply('Invalid usage , use `~play <url>`');
+      }
+      })
+        .catch(console.log);
+    } else {
+    	msg.reply('You need to join a voice channel first!');
+    }
+
+}
+
+
+ if (command === 'stop') {
+ 	if (msg.member.voiceChannel) {
+    	msg.member.voiceChannel.leave();
+    } else {
+    	msg.reply('You need to join a voice channel first!');
+    }
+ }
+
+ if (command == "annie") {
+ 	var words = "";
+		for (var i = 0; i < args.length; i++) {
+			words += " " + args[i];
+		}
+	msg.reply(`${words}`);
+}
 });
+
+
 
 // Greeting the new joined member
 bot.on('guildMemberAdd', member => {
